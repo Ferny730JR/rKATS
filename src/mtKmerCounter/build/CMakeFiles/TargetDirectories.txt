@@ -1,9 +1,0 @@
-/Users/fcavazos/RNA_Lab/programs/rkatss/src/mtKmerCounter/build/CMakeFiles/OBJLIB.dir
-/Users/fcavazos/RNA_Lab/programs/rkatss/src/mtKmerCounter/build/CMakeFiles/katss_shared.dir
-/Users/fcavazos/RNA_Lab/programs/rkatss/src/mtKmerCounter/build/CMakeFiles/katss_static.dir
-/Users/fcavazos/RNA_Lab/programs/rkatss/src/mtKmerCounter/build/CMakeFiles/edit_cache.dir
-/Users/fcavazos/RNA_Lab/programs/rkatss/src/mtKmerCounter/build/CMakeFiles/rebuild_cache.dir
-/Users/fcavazos/RNA_Lab/programs/rkatss/src/mtKmerCounter/build/CMakeFiles/list_install_components.dir
-/Users/fcavazos/RNA_Lab/programs/rkatss/src/mtKmerCounter/build/CMakeFiles/install.dir
-/Users/fcavazos/RNA_Lab/programs/rkatss/src/mtKmerCounter/build/CMakeFiles/install/local.dir
-/Users/fcavazos/RNA_Lab/programs/rkatss/src/mtKmerCounter/build/CMakeFiles/install/strip.dir

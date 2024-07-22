@@ -1,2 +1,0 @@
-/Library/Developer/CommandLineTools/usr/bin/ar qc libkatss.a CMakeFiles/OBJLIB.dir/source/hash_functions.c.o CMakeFiles/OBJLIB.dir/source/tables.c.o CMakeFiles/OBJLIB.dir/source/seqseq.c.o CMakeFiles/OBJLIB.dir/source/counter.c.o CMakeFiles/OBJLIB.dir/source/uncounter.c.o CMakeFiles/OBJLIB.dir/source/enrichments.c.o CMakeFiles/OBJLIB.dir/source/helpers/rnafiles.c.o CMakeFiles/OBJLIB.dir/source/helpers/memory_utils.c.o CMakeFiles/OBJLIB.dir/source/tinycthread/source/tinycthread.c.o
-/Library/Developer/CommandLineTools/usr/bin/ranlib libkatss.a

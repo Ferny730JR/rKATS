@@ -89,8 +89,9 @@ ikke <- function(testfile, ctrlfile, kmer, iterations = 10, normalize = FALSE,
 #' 'U' are equivalent. The maximum length sequence to search for is currently
 #' capped at 255.
 #'
-#' @param sequence Big sequence
-#' @param search   Small sequence to search for
+#' @param sequence    Big sequence
+#' @param search      Small sequence to search for
+#' @param all.matches Find all occurrences of search in sequence
 #'
 #' @return Index in which search was found, 0 if not found
 #' @useDynLib rkatss, .registration = TRUE

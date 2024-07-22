@@ -4,7 +4,7 @@
 \alias{seqseq}
 \title{Search for a sequence within a sequence}
 \usage{
-seqseq(sequence, search, all.matches = TRUE)
+seqseq(sequence, search, all.matches = FALSE)
 }
 \arguments{
 \item{sequence}{Big sequence}
@@ -17,8 +17,8 @@ Index in which search was found, 0 if not found
 \description{
 This function returns the index in which a sub-sequence is found within a
 larger sequence, or 0 if not found. Searching is case insensitive and 'T' and
-'U' are equivalent. The maximum length sequence to search for
-is currently capped at 255.
+'U' are equivalent. The maximum length sequence to search for is currently
+capped at 255.
 }
 \examples{
 ## Find "AAA" in a random sequence
