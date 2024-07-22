@@ -1,0 +1,14 @@
+Package: rkatss
+Title: Test for the R C api
+Version: 0.0.0.9000
+Authors@R: 
+    person("Francisco", "Cavazos", , "francisco.cavazos03@gmail.com", role = c("aut", "cre"),
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Author: Francisco F Cavazos [aut, cre]
+Maintainer: Francisco F Cavazos <francisco.cavazos03@gmail.com>
+Description: This package is for being able to test the C api within R.
+SystemRequirements: cmake (>= 3.7.1)
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
