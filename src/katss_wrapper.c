@@ -65,13 +65,23 @@ SEXP count_kmers_R(SEXP filename, SEXP kmer) {
 
 
 /* Function to convert R inputs to C and call katss_enrichments */
-SEXP enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, Rboolean normalize) {
+SEXP
+enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP probabilistic, SEXP normalize)
+{
 	const char *test_filename = CHAR(STRING_ELT(test_file, 0));
-	const char *ctrl_filename = CHAR(STRING_ELT(ctrl_file, 0));
 	unsigned int c_kmer = INTEGER(kmer)[0];
-	bool c_normalize = normalize == TRUE;
+	bool c_normalize = asLogical(normalize) == TRUE;
 
-	KatssEnrichments *result = katss_enrichments(test_filename, ctrl_filename, c_kmer, c_normalize);
+	/* Compute the actual enrichments */
+	KatssEnrichments *result;
+	if(asLogical(probabilistic) == TRUE)
+		result = katss_prob_enrichments(test_filename, c_kmer, c_normalize);
+	else {
+		const char *ctrl_filename = CHAR(STRING_ELT(ctrl_file, 0));
+		result = katss_enrichments(test_filename, ctrl_filename, c_kmer, c_normalize);
+	}
+
+	/* If enrichments failed for whatever reason, return NULL */
 	if(result == NULL) {
 		return R_NilValue;
 	}
@@ -120,23 +130,35 @@ SEXP enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, Rboolean normalize
 
 
 /* ikkr_R: C wrapper to perform iterative k-mer knockout enrichments in R */
-SEXP ikke_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP iterations, SEXP normalize, SEXP threads) {
-	const char *test_filename = CHAR(STRING_ELT(test_file, 0));
-	const char *ctrl_filename = CHAR(STRING_ELT(ctrl_file, 0));
+SEXP
+ikke_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP iterations, SEXP probabilistic,
+       SEXP normalize, SEXP threads)
+{
 	unsigned int c_kmer = INTEGER(kmer)[0];
 	uint64_t c_iterations = REAL(iterations)[0];
 	bool c_normalize = asLogical(normalize) == TRUE;
 	int c_threads = INTEGER(threads)[0];
 
 	KatssEnrichments *result;
-	/* If single threaded, use regular ikke*/
-	if(c_threads < 2)
-		result = katss_ikke(test_filename, ctrl_filename, c_kmer, c_iterations, c_normalize);
-	
-	/* Else if multithreaded, use mt version */
-	else
-		result = katss_ikke_mt(test_filename, ctrl_filename, c_kmer, c_iterations, c_normalize, c_threads);
-
+	const char *test_filename = CHAR(STRING_ELT(test_file, 0));
+	if(asLogical(probabilistic) == TRUE) {
+		/* If single threaded, use regular probalistic ikke */
+		if(c_threads < 2)
+			result = katss_prob_ikke(test_filename, c_kmer, c_iterations, c_normalize);
+		
+		/* If multithreaded, use mt version */
+		else
+			result = katss_prob_ikke_mt(test_filename, c_kmer, c_iterations, c_normalize, c_threads);
+	} else {
+		const char *ctrl_filename = CHAR(STRING_ELT(ctrl_file, 0));
+		/* If single threaded, use regular ikke*/
+		if(c_threads < 2)
+			result = katss_ikke(test_filename, ctrl_filename, c_kmer, c_iterations, c_normalize);
+		
+		/* Else if multithreaded, use mt version */
+		else
+			result = katss_ikke_mt(test_filename, ctrl_filename, c_kmer, c_iterations, c_normalize, c_threads);
+	}
 	/* If IKKE failed, return NULL */
 	if(result == NULL) {
 		return R_NilValue;

@@ -20,8 +20,8 @@ extern SEXP seqseq_R(void *, void *);
 
 static const R_CallMethodDef CallEntries[] = {
     {"count_kmers_R", (DL_FUNC) &count_kmers_R, 2},
-    {"enrichments_R", (DL_FUNC) &enrichments_R, 4},
-    {"ikke_R",        (DL_FUNC) &ikke_R,        6},
+    {"enrichments_R", (DL_FUNC) &enrichments_R, 5},
+    {"ikke_R",        (DL_FUNC) &ikke_R,        7},
     {"seqseq_R",      (DL_FUNC) &seqseq_R,      3},
     {NULL, NULL, 0}
 };

@@ -10,6 +10,8 @@ seqseq(sequence, search, all.matches = FALSE)
 \item{sequence}{Big sequence}
 
 \item{search}{Small sequence to search for}
+
+\item{all.matches}{Find all occurrences of search in sequence}
 }
 \value{
 Index in which search was found, 0 if not found
