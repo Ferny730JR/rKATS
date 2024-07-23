@@ -4,24 +4,42 @@
 \alias{ikke}
 \title{Title Iterative K-mer Knockout Enrichments}
 \usage{
-ikke(testfile, ctrlfile, kmer, iterations = 10, normalize = FALSE, threads = 1)
+ikke(
+  testfile,
+  ctrlfile = NULL,
+  kmer = 3,
+  iterations = 10,
+  probabilistic = FALSE,
+  normalize = FALSE,
+  threads = 1
+)
 }
 \arguments{
-\item{testfile}{Test sequences file. Can be in FASTQ, FASTA, or Sequences format}
+\item{testfile}{Test sequences file. Can be in FASTQ, FASTA, or raw sequences
+format. Raw sequences format is a file containing only "A", "C", "G", and "T"
+/"U" characters, in every sequence separated by newline.}
 
-\item{ctrlfile}{Control sequences file}
+\item{ctrlfile}{Control sequences file. Can be in FASTQ, FASTA, or raw sequences
+format. Raw sequences format is a file containing only "A", "C", "G", and "T"
+/"U" characters, in every sequence separated by newline.}
 
-\item{kmer}{Length of k-mer}
+\item{kmer}{Length of k-mer.}
 
 \item{iterations}{Number of iterations to perform}
 
+\item{probabilistic}{Calculate probabilistic enrichments.}
+
 \item{normalize}{Normalize enrichments to log2}
 
-\item{threads}{Number of threads to use}
+\item{threads}{Number of threads to use. Specifying less than 1 thread
+sets the number of threads as 1.}
 }
 \value{
 data.frame containing the enrichments
 }
 \description{
 Title Iterative K-mer Knockout Enrichments
+}
+\examples{
+print("ikke example")
 }

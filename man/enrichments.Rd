@@ -2,9 +2,16 @@
 % Please edit documentation in R/count_kmers.R
 \name{enrichments}
 \alias{enrichments}
-\title{Calculate enrichments}
+\title{Calculate k-mer enrichments}
 \usage{
-enrichments(testfile, ctrlfile, kmer, normalize = FALSE)
+enrichments(
+  testfile,
+  ctrlfile = NULL,
+  kmer = 3,
+  probabilistic = FALSE,
+  normalize = FALSE,
+  verbose = FALSE
+)
 }
 \arguments{
 \item{testfile}{Test sequences}
@@ -13,13 +20,17 @@ enrichments(testfile, ctrlfile, kmer, normalize = FALSE)
 
 \item{kmer}{Length of kmer}
 
+\item{probabilistic}{Compute probabilistic enrichments}
+
 \item{normalize}{Get log2 of enrichments}
+
+\item{verbose}{Verbose output for calculations}
 }
 \value{
 dataframe containing enrichments
 }
 \description{
-Calculate enrichments
+Calculate k-mer enrichments
 }
 \examples{
 print("Hello, world!")

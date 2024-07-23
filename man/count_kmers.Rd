@@ -4,10 +4,10 @@
 \alias{count_kmers}
 \title{K-mer counting}
 \usage{
-count_kmers(filename, kmer)
+count_kmers(file, kmer = 3)
 }
 \arguments{
-\item{filename}{Name of the file which you want to count k-mers from
+\item{file}{Name of the file which you want to count k-mers from
 The file has to be of either: raw sequences, fasta, or fastq format. Other
 file types are currently unsupported and will not work properly if used.}
 
