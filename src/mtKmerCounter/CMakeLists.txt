@@ -21,7 +21,7 @@ option(SKIP_INSTALL_STATIC "Don't install static library")
 option(SKIP_INSTALL_SHARED "Don't install shared library")
 option(SKIP_INSTALL_HEADER "Don't install header files")
 
-add_compile_definitions(KATSS_VERBOSE=${VERBOSE})
+add_compile_definitions(KATSS_VERBOSE=$<BOOL:${VERBOSE}>)
 
 #Include dependencies
 set(TINYCTHREAD source/tinycthread)
