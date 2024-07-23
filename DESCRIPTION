@@ -1,13 +1,19 @@
 Package: rkatss
-Title: Test for the R C api
+Title: R wrapper for the KATSS package
 Version: 0.0.0.9000
 Authors@R: 
     person("Francisco", "Cavazos", , "francisco.cavazos03@gmail.com", role = c("aut", "cre"),
-           comment = c(ORCID = "YOUR-ORCID-ID"))
+           comment = c(ORCID = "0009-0000-1804-9601"))
 Author: Francisco F Cavazos [aut, cre]
 Maintainer: Francisco F Cavazos <francisco.cavazos03@gmail.com>
 Description: This package is for being able to test the C api within R.
+Depends: 
+    ggplot2,
+    ggseqlogo,
+    R (>= 2.10)
+Imports: stringr, stats
 SystemRequirements: cmake (>= 3.7.1)
+LazyData: true
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
