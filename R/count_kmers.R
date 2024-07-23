@@ -2,7 +2,7 @@
 #'
 #' Count the k-mers in a fastq, fasta, or raw sequences file.
 #'
-#' @param filename Name of the file which you want to count k-mers from
+#' @param file Name of the file which you want to count k-mers from
 #' The file has to be of either: raw sequences, fasta, or fastq format. Other
 #' file types are currently unsupported and will not work properly if used.
 #' @param kmer Length of the k-mer you want to count. Currently, only k-mers up
@@ -42,6 +42,7 @@ count_kmers <- function(file, kmer = 3) {
 #' @param kmer     Length of kmer
 #' @param normalize Get log2 of enrichments
 #' @param probabilistic Compute probabilistic enrichments
+#' @param verbose Verbose output for calculations
 #'
 #' @return dataframe containing enrichments
 #' @useDynLib rkatss, .registration = TRUE
@@ -61,14 +62,16 @@ enrichments <- function(testfile, ctrlfile = NULL, kmer = 3, probabilistic = FAL
     stop("probabilistic must be either TRUE or FALSE")
   if(!is.logical(normalize))
     stop("normalize must be either TRUE or FALSE ")
+  if(!is.logical(verbose))
+    stop("verbose must be either TRUE or FALSE")
 
   if(probabilistic && is.character(ctrlfile))
     warning("Ignoring ctrlfile argument")
   if(!probabilistic && is.null(ctrlfile))
     stop("ctrlfile is required when computing non-probabilistic enrichments")
-  if(kmer>12) {
+  if(16 >= kmer && kmer>12) {
     menu_title = paste(convert_bytes(4^kmer * 176), "Are you sure you want to proceed?")
-    if(menu(c("Yes", "No! Fix your program!"), title = menu_title) == 2)
+    if(utils::menu(c("Yes", "No! Fix your program!"), title = menu_title) == 2)
       return(NULL)
   }
 
@@ -78,7 +81,7 @@ enrichments <- function(testfile, ctrlfile = NULL, kmer = 3, probabilistic = FAL
 
   # Do calculations in C and return
   return(.Call("enrichments_R", testfile, ctrlfile, as.integer(kmer),
-               probabilistic, normalize))
+               probabilistic, normalize, verbose))
 }
 
 
@@ -102,6 +105,7 @@ enrichments <- function(testfile, ctrlfile = NULL, kmer = 3, probabilistic = FAL
 #' @export
 #'
 #' @examples
+#' print("ikke example")
 ikke <- function(testfile, ctrlfile = NULL, kmer = 3, iterations = 10,
                  probabilistic = FALSE, normalize = FALSE, threads = 1) {
   if(!is.character(testfile))

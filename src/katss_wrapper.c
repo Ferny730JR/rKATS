@@ -66,14 +66,19 @@ SEXP count_kmers_R(SEXP filename, SEXP kmer) {
 
 /* Function to convert R inputs to C and call katss_enrichments */
 SEXP
-enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP probabilistic, SEXP normalize)
+enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP probabilistic, 
+              SEXP normalize, SEXP verbose)
 {
 	const char *test_filename = CHAR(STRING_ELT(test_file, 0));
 	unsigned int c_kmer = INTEGER(kmer)[0];
 	bool c_normalize = asLogical(normalize) == TRUE;
+	bool c_verbose = asLogical(verbose);
 
 	/* Compute the actual enrichments */
 	KatssEnrichments *result;
+	if(c_verbose)
+		Rprintf("Begin calculating enrichments...\n");
+
 	if(asLogical(probabilistic) == TRUE)
 		result = katss_prob_enrichments(test_filename, c_kmer, c_normalize);
 	else {
@@ -85,6 +90,9 @@ enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP probabilistic, SEX
 	if(result == NULL) {
 		return R_NilValue;
 	}
+	if(c_verbose)
+		Rprintf("Finished calculating enrichments, creating data.frame...\n");
+
 	uint64_t capacity = (uint64_t)result->num_enrichments;
 
 	SEXP counts_r = PROTECT(allocVector(REALSXP, capacity));
@@ -125,6 +133,9 @@ enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP probabilistic, SEX
 	setAttrib(df, R_ClassSymbol, mkString("data.frame"));
 
 	UNPROTECT(5);
+
+	if(c_verbose)
+		Rprintf("Finished creating data.frame, returning...\n");
 	return df;
 }
 
