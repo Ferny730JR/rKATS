@@ -5,3 +5,6 @@
 .DS_Store
 .quarto
 .vscode
+build/
+src/*.o
+src/*.so
