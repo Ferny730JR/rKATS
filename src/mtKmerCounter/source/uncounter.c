@@ -256,6 +256,7 @@ remove_kmer(void *arg)
 			ptr = rec->proc(rec->counter, ptr, rec->kmer);
 		}
 	}
+	free(buffer);
 	return 0;
 }
 
