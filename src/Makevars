@@ -1,5 +1,5 @@
 PKG_CPPFLAGS = -ImtKmerCounter/include
-PKG_LIBS = mtKmerCounter/build/libkatss.a
+PKG_LIBS = ikke/build/source/katss/KmerCounter/source/libkkctr.a
 
 all: $(SHLIB)
 
@@ -7,10 +7,9 @@ $(SHLIB): mylibs
 	$(CC) $(PKG_CPPFLAGS) -o $@ $(PKG_OBJECTS) $(PKG_LIBS) $(ALL_LIBS)
 
 mylibs:
-	(cd mtKmerCounter && mkdir -p build && cd build && \
+	(cd ikke && mkdir -p build && cd build && \
 	CC="$(CC)" CFLAGS="$(CFLAGS)" \
 	CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
 	cmake .. -DCMAKE_BUILD_TYPE=Release -DVERBOSE=ON \
-	-DBUILD_SHARED_LIBS:bool=OFF \
-	-DCMAKE_POSITION_INDEPENDENT_CODE:bool=ON && \
+	-DCMAKE_POSITION_INDEPENDENT_CODE:bool=ON &&\
 	$(MAKE))

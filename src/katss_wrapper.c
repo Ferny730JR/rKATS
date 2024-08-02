@@ -1,12 +1,11 @@
 #include <R.h>
 #include <Rinternals.h>
 
-#include "mtKmerCounter/include/counter.h"
-#include "mtKmerCounter/include/hash_functions.h"
-#include "mtKmerCounter/include/seqseq.h"
-#include "mtKmerCounter/include/enrichments.h"
-#include "mtKmerCounter/source/katss_core.h"
-#include "mtKmerCounter/source/helpers/memory_utils.h"
+#include "ikke/source/katss/helpers/memory_utils.h"
+#include "ikke/source/katss/KmerCounter/include/counter.h"
+#include "ikke/source/katss/KmerCounter/include/hash_functions.h"
+#include "ikke/source/katss/KmerCounter/include/seqseq.h"
+#include "ikke/source/katss/KmerCounter/include/enrichments.h"
 
 // Function to convert R inputs to C and call count_kmers
 SEXP count_kmers_R(SEXP filename, SEXP kmer) {
@@ -17,7 +16,7 @@ SEXP count_kmers_R(SEXP filename, SEXP kmer) {
 	if(result == NULL) {
 		return R_NilValue;
 	}
-	uint64_t capacity = (uint64_t)result->capacity+1;
+	uint64_t capacity = ((uint64_t)1) << (2*c_kmer);
 
 	SEXP counts_r = PROTECT(allocVector(REALSXP, capacity));
 	SEXP kmer_strings = PROTECT(allocVector(STRSXP, capacity));
@@ -26,11 +25,8 @@ SEXP count_kmers_R(SEXP filename, SEXP kmer) {
 	// copy the contents of counts into the R vector
 	for(uint32_t i=0; i < capacity; i++) {
 		/* Set k-mer counts */
-		if(c_kmer<=12) {
-			counts_r_ptr[i] = (double)result->table.small[i];
-		} else {
-			counts_r_ptr[i] = (double)result->table.medium[i];
-		}
+		katss_get_from_hash(result, KATSS_DOUBLE, &counts_r_ptr[i], i);
+
 		/* Set k-mer string */
 		char kseq[c_kmer + 1U];
 		katss_unhash(kseq, i, c_kmer, 1);
