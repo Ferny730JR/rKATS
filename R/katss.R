@@ -14,8 +14,11 @@
 #' @useDynLib rkatss, .registration = TRUE
 #'
 #' @examples
+#' # Create temporary file with sequences
+#' set.seed(1)
 #' test1 <- do.call(paste0, replicate(50, sample(c("A","C","G","T"), 1000, TRUE), FALSE))
 #' tf <- tempfile()
+#' writeLines(test1, tf)
 #'
 #' # Count di-nucleotides in file
 #' count_kmers(tf, kmer = 2)
@@ -49,7 +52,34 @@ count_kmers <- function(file, kmer = 3) {
 #' @export
 #'
 #' @examples
-#' print("Hello, world!")
+#' # Load data
+#' data(rbfox2_seqs)
+#'
+#' test_seqs <- tempfile()
+#' writeLines(rbfox2_seqs$bound, test_seqs)
+#'
+#' # Get the enrichments without a control
+#' result <- enrichments(test_seqs, probabilistic = TRUE)
+#' head(result)
+#'
+#' # Get the 5-mer enrichments
+#' result <- enrichments(test_seqs, kmer = 5, probabilistic = TRUE)
+#' head(result)
+#'
+#' ctrl_seqs <- tempfile()
+#' writeLines(rbfox2_seqs$input, ctrl_seqs)
+#'
+#' # Get the enrichments when you have a control
+#' result <- enrichments(test_seqs, ctrl_seqs, kmer = 5)
+#' head(result)
+#'
+#' # Normalize enrichments to log2
+#' result <- enrichments(test_seqs, ctrl_seqs, kmer = 5, normalize = TRUE)
+#' head(result)
+#' tail(result)
+#'
+#' unlink(test_seqs)
+#' unlink(ctrl_seqs)
 enrichments <- function(testfile, ctrlfile = NULL, kmer = 3, probabilistic = FALSE,
                         normalize = FALSE, verbose = FALSE) {
   if(!is.character(testfile))
@@ -77,7 +107,8 @@ enrichments <- function(testfile, ctrlfile = NULL, kmer = 3, probabilistic = FAL
 
   # Done with argument checks, expand filepaths if necessary
   testfile <- path.expand(as.character(testfile))
-  ctrlfile <- path.expand(as.character(ctrlfile))
+  if(!is.null(ctrlfile))
+    ctrlfile <- path.expand(as.character(ctrlfile))
 
   # Do calculations in C and return
   return(.Call("enrichments_R", testfile, ctrlfile, as.integer(kmer),
@@ -105,7 +136,35 @@ enrichments <- function(testfile, ctrlfile = NULL, kmer = 3, probabilistic = FAL
 #' @export
 #'
 #' @examples
-#' print("ikke example")
+#' # Load data
+#' data(rbfox2_seqs)
+#'
+#' test_seqs <- tempfile()
+#' writeLines(rbfox2_seqs$bound, test_seqs)
+#'
+#' # Get the enrichments without a control
+#' result <- ikke(test_seqs, probabilistic = TRUE)
+#' head(result)
+#'
+#' # Get the 5-mer enrichments
+#' result <- ikke(test_seqs, kmer = 5, probabilistic = TRUE)
+#' head(result)
+#'
+#' ctrl_seqs <- tempfile()
+#' writeLines(rbfox2_seqs$input, ctrl_seqs)
+#'
+#' # Get the enrichments when you have a control
+#' result <- ikke(test_seqs, ctrl_seqs, kmer = 5)
+#' head(result)
+#'
+#' # Specify the number of enrichments to obtain
+#' result <- ikke(test_seqs, ctrl_seqs, kmer = 5, iterations = 2)
+#' print(result)
+#'
+#' # Normalize enrichments to log2
+#' result <- ikke(test_seqs, ctrl_seqs, kmer = 5, normalize = TRUE)
+#' head(result)
+#' tail(result)
 ikke <- function(testfile, ctrlfile = NULL, kmer = 3, iterations = 10,
                  probabilistic = FALSE, normalize = FALSE, threads = 1) {
   if(!is.character(testfile))
@@ -114,7 +173,8 @@ ikke <- function(testfile, ctrlfile = NULL, kmer = 3, iterations = 10,
 
   if(!is.character(ctrlfile) && !is.null(ctrlfile))
     stop("ctrlfile must be a character string")
-  ctrlfile <- path.expand(ctrlfile)
+  if(!is.null(ctrlfile))
+    ctrlfile <- path.expand(ctrlfile)
 
   if(!is.numeric(kmer) && kmer != as.integer(kmer))
     stop("kmer must be an integer")
@@ -223,3 +283,21 @@ convert_bytes <- function(total_bytes) {
 
   return(warning_msg)
 }
+
+################################################################################
+#                              KATSS SAMPLE DATA                               #
+################################################################################
+
+#' List containing the test and control sequences for RNA-binding protein RBFOX2
+#'
+#' @name rbfox2_seqs
+#' @docType data
+#' @keywords data
+#' @usage data(rbfox2_seqs)
+#' @format A list containing two lists: a list of control sequences, and a list
+#' of test sequences.
+#' \describe{
+#'  \item{input}{1000 control sequences of 20 nt long}
+#'  \item{bound}{1000 test sequences of 20 nt long}
+#' }
+"rbfox2_seqs"
