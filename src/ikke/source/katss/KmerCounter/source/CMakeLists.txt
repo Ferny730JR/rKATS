@@ -11,7 +11,7 @@ set(KATSS_SOURCE_FILES
 add_library(OBJLIB OBJECT "${KATSS_SOURCE_FILES}")
 
 # Shared libraries need PIC
-set_property(TARGET OBJLIB PROPERTY POSITION_INDEPENDENT_CODE 1)
+#set_property(TARGET OBJLIB PROPERTY POSITION_INDEPENDENT_CODE 1)
 target_compile_definitions(OBJLIB PRIVATE KATSS_VERBOSE=$<BOOL:${KKCTR_VERBOSE}>)
 
 # Set optimization flags for release builds
@@ -41,7 +41,7 @@ endif()
 
 #target_link_libraries(kkctr_shared # RNAFILES links tinycthread
 #	ZLIB::ZLIB KATSS_MEMORYUTILS KATSS_RNAFILES ${EXTRA_LIBS})
-target_link_libraries(kkctr_static tinycthread KATSS_MEMORYUTILS KATSS_RNAFILES ${EXTRA_LIBS})
+target_link_libraries(kkctr_static PRIVATE KATSS_MEMORYUTILS KATSS_RNAFILES ${THREAD_LIB} ${EXTRA_LIBS})
 
 # Set public include directory
 #target_include_directories(kkctr_shared PUBLIC ${KKCTR_INCLUDE_DIR})
