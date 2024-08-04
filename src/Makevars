@@ -8,8 +8,7 @@ $(SHLIB): mylibs
 
 mylibs:
 	(cd ikke && mkdir -p build && cd build && \
-	CC="$(CC)" CFLAGS="$(CFLAGS)" \
-	CPPFLAGS="$(CPPFLAGS)" LDFLAGS="$(LDFLAGS)" \
+	CC="$(CC)" \
 	cmake .. -DCMAKE_BUILD_TYPE=Release -DVERBOSE=ON \
 	-DCMAKE_POSITION_INDEPENDENT_CODE:bool=ON &&\
 	$(MAKE))
