@@ -227,7 +227,6 @@ ikke <- function(testfile, ctrlfile = NULL, kmer = 3, iterations = 10,
 #'
 #' ## Searching is case-insensitive
 #' seq <- "accgtaagggtgccttac"
-#' find2 <- "GGGT"
 #' seqseq(seq, "GGGT")
 #' seqseq(seq, "gCCtT")
 #'

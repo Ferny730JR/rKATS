@@ -7,7 +7,7 @@ target_compile_definitions(KATSS_MEMORYUTILS PRIVATE KATSS_VERBOSE=$<BOOL:${VERB
 add_library(KATSS_RNAFILES OBJECT "rnafiles.c")
 target_include_directories(KATSS_RNAFILES PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
 target_include_directories(KATSS_RNAFILES PRIVATE ${COMPRESSION_INC})
-target_link_libraries(KATSS_RNAFILES PRIVATE tinycthread ${COMPRESSION_LIB})
+target_link_libraries(KATSS_RNAFILES PRIVATE ${THREAD_LIB} ${COMPRESSION_LIB})
 target_compile_definitions(KATSS_RNAFILES PRIVATE _HAS_ISA_L_=$<BOOL:${KATSS_HAS_ISA_L}>)
 
 # KATSS string library

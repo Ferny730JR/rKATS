@@ -1,11 +1,11 @@
 #include <R.h>
 #include <Rinternals.h>
 
-#include "ikke/source/katss/helpers/memory_utils.h"
-#include "ikke/source/katss/KmerCounter/include/counter.h"
-#include "ikke/source/katss/KmerCounter/include/hash_functions.h"
-#include "ikke/source/katss/KmerCounter/include/seqseq.h"
-#include "ikke/source/katss/KmerCounter/include/enrichments.h"
+#include "memory_utils.h"
+#include "counter.h"
+#include "hash_functions.h"
+#include "seqseq.h"
+#include "enrichments.h"
 
 // Function to convert R inputs to C and call count_kmers
 SEXP count_kmers_R(SEXP filename, SEXP kmer) {
@@ -84,10 +84,12 @@ enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP probabilistic,
 
 	/* If enrichments failed for whatever reason, return NULL */
 	if(result == NULL) {
+		Rprintf("Begin calculating enrichments... Failure\n");
 		return R_NilValue;
 	}
 	if(c_verbose)
-		Rprintf("Finished calculating enrichments, creating data.frame...\n");
+		Rprintf("Begin calculating enrichments... Success\n"
+		        "Creating data.frame...\n");
 
 	uint64_t capacity = (uint64_t)result->num_enrichments;
 
@@ -131,7 +133,7 @@ enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP probabilistic,
 	UNPROTECT(5);
 
 	if(c_verbose)
-		Rprintf("Finished creating data.frame, returning...\n");
+		Rprintf("Creating data.frame... Success\n");
 	return df;
 }
 
