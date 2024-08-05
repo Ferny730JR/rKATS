@@ -1,6 +1,6 @@
 Package: rkatss
 Title: R wrapper for the KATSS package
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: 
     person("Francisco", "Cavazos", , "francisco.cavazos03@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0000-1804-9601"))
