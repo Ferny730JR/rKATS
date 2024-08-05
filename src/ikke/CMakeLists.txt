@@ -60,4 +60,6 @@ else()
 endif()
 
 set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb3")
+
+# Begin building source code
 add_subdirectory(source)
