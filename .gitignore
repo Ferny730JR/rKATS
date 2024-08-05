@@ -8,3 +8,4 @@
 build/
 src/*.o
 src/*.so
+.vscode/
