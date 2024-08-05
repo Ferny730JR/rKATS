@@ -1,5 +1,5 @@
-PKG_CPPFLAGS = -ImtKmerCounter/include
-PKG_LIBS = ikke/build/source/katss/KmerCounter/source/libkkctr.a
+PKG_CPPFLAGS = -Iikke/source/katss/helpers -Iikke/source/katss/KmerCounter/include
+PKG_LIBS = ikke/build/source/katss/KmerCounter/source/libkkctr.a 
 
 all: $(SHLIB)
 
