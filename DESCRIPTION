@@ -6,7 +6,9 @@ Authors@R:
            comment = c(ORCID = "0009-0000-1804-9601"))
 Author: Francisco F Cavazos [aut, cre]
 Maintainer: Francisco F Cavazos <francisco.cavazos03@gmail.com>
-Description: This package is for being able to test the C api within R.
+Description: Analyze RNA sequences and identify enriched motifs in protein-bound
+    RNA. The package comes with functions for k-mer counting, enrichment
+    calculations, k-mer alignment, and plotting utilities.
 Depends: 
     ggplot2,
     ggseqlogo,
