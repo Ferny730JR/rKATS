@@ -1,5 +1,5 @@
-PKG_CPPFLAGS = -Iikke/source/katss/helpers -Iikke/source/katss/KmerCounter/include
-PKG_LIBS = ikke/build/source/katss/KmerCounter/source/libkkctr.a 
+PKG_CPPFLAGS = -I katss/source/katss/helpers -I katss/source/katss/KmerCounter/include
+PKG_LIBS = katss/build/source/katss/KmerCounter/source/libkkctr.a 
 
 all: $(SHLIB)
 
@@ -7,7 +7,7 @@ $(SHLIB): mylibs
 	$(CC) $(PKG_CPPFLAGS) -o $@ $(PKG_OBJECTS) $(PKG_LIBS) $(ALL_LIBS)
 
 mylibs:
-	(cd ikke && mkdir -p build && cd build && \
+	(cd katss && mkdir -p build && cd build && \
 	CC="$(CC)" \
 	cmake .. -DCMAKE_BUILD_TYPE=Release -DVERBOSE=ON \
 	-DCMAKE_POSITION_INDEPENDENT_CODE:bool=ON &&\
