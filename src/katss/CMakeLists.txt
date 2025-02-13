@@ -4,8 +4,15 @@ project(KATSS
 	DESCRIPTION "K-mer counting function utilities."
 	LANGUAGES C)
 
+# Default to a release build.
+if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+	message(STATUS "No build type selected; defaulting to Release")
+	set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build" FORCE)
+endif()
+
 set(CMAKE_C_STANDARD 11)
 
+# Check if C11 threads is supported, otherwise find any thread functionality
 include(CheckIncludeFile)
 CHECK_INCLUDE_FILE(threads.h HAVE_C11_THREADS)
 if(NOT HAVE_C11_THREADS)
@@ -15,6 +22,10 @@ else()
 	set(THREAD_LIB Threads::Threads)
 endif()
 
+# Find if OpenMP is supported
+find_package(OpenMP)
+
+# Check for IPO optimizations
 include(CheckIPOSupported)
 check_ipo_supported(RESULT ipo_is_supported OUTPUT ipo_error)
 if(ipo_is_supported)
@@ -60,6 +71,4 @@ else()
 endif()
 
 set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb3")
-
-# Begin building source code
 add_subdirectory(source)
