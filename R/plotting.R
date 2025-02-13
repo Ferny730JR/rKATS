@@ -257,6 +257,61 @@ align_kmers <- function(df, is_log2 = FALSE, limit = Inf) {
   return(df)
 }
 
+
+
+#' Title
+#'
+#' @param pwm1 Position Weight Matrix to correlate
+#' @param pwm2 Position Weight Matrix to correlate
+#' @param kmer Length of kmer to attempt to correlate from the PWM's. Should
+#' not have a length greater than the number of rows in either PWM1/PWM2. Kmer
+#' should be specified to be able to compare PWM's of with different number of
+#' rows.
+#' @param ret Return the actual correlation and p-value (cor), or the PWM which
+#' was used for the correlation value.
+#'
+#' @return Correlation coefficient of the PWM's
+#' @export
+#'
+#' @examples
+#' # Load sample data
+#' data(rbfox2_pwms)
+#'
+#' # Get the correlation between both PWMs
+#' cor.pwm(rbfox2_pwms[[1]], rbfox2_pwms[[2]], kmer = 5)
+cor.pwm <- function(pwm1, pwm2, kmer, ret = c("cor", "pwm")) {
+  pwm1_len <- ncol(pwm1)
+  pwm2_len <- ncol(pwm2)
+  if(kmer > pwm1_len | kmer > pwm2_len) {
+    print("ERROR: Kmer too large!")
+    return(NULL)
+  }
+
+  best_cor <- -Inf
+  for(i in 1:(pwm1_len-kmer+1)) {
+    for(j in 1:(pwm2_len-kmer+1)) {
+      cur_pwm1 <- pwm1[,i:(kmer+i-1)]
+      cur_pwm2 <- pwm2[,j:(kmer+j-1)]
+
+      cur_cor <- cor.test(c(cur_pwm1), c(cur_pwm2))
+      if(cur_cor$estimate > best_cor) {
+        best_pwm1 <- cur_pwm1
+        best_pwm2 <- cur_pwm2
+        best_cor <- cur_cor$estimate
+        best_p <- cur_cor$p.value
+      }
+    }
+  }
+  if(ret[1] == "cor") {
+    return(list(best_cor,best_p))
+  } else if(ret[1] == "pwm") {
+    return(list(best_pwm1, best_pwm2))
+  } else {
+    print("Use a correct ret!")
+    return(NULL)
+  }
+}
+
 ################################################################################
 #                               HELPER FUNCTIONS                               #
 ################################################################################

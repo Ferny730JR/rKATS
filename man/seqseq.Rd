@@ -29,7 +29,6 @@ seqseq(seq, "AAA")
 
 ## Searching is case-insensitive
 seq <- "accgtaagggtgccttac"
-find2 <- "GGGT"
 seqseq(seq, "GGGT")
 seqseq(seq, "gCCtT")
 
