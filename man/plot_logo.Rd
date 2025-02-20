@@ -5,7 +5,7 @@
 \title{Plot sequence logo from a PWM}
 \usage{
 plot_logo(
-  pwm,
+  logo_list,
   ncol = NULL,
   method = c("bits", "probability"),
   title = "Weighted Sequence Logo",
@@ -14,7 +14,7 @@ plot_logo(
 )
 }
 \arguments{
-\item{pwm}{PWM you want to plot}
+\item{logo_list}{List of logos you want to plot}
 
 \item{ncol}{Number of columns}
 
@@ -38,15 +38,11 @@ see \link[ggseqlogo]{ggseqlogo} and \link[ggseqlogo]{geom_logo}
 # Load sample data
 data(rbfox2_pwms)
 
-# Plot single logo
-rbfox2_plot <- plot_logo(rbfox2_pwms[[1]])
-print(rbfox2_plot)
-
-# Plot single logo using probability
-rbfox2_plot <- plot_logo(rbfox2_pwms[[1]], method = "probability")
-print(rbfox2_plot)
-
 # Plot multiple logos
 rbfox2_plot <- plot_logo(rbfox2_pwms)
+print(rbfox2_plot)
+
+# Plot multiple logos using probability
+rbfox2_plot <- plot_logo(rbfox2_pwms, method = "probability")
 print(rbfox2_plot)
 }

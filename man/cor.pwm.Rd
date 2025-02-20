@@ -2,7 +2,7 @@
 % Please edit documentation in R/plotting.R
 \name{cor.pwm}
 \alias{cor.pwm}
-\title{Title}
+\title{Calculate the correlation coefficient between two PWM's.}
 \usage{
 cor.pwm(pwm1, pwm2, kmer, ret = c("cor", "pwm"))
 }
@@ -23,12 +23,12 @@ was used for the correlation value.}
 Correlation coefficient of the PWM's
 }
 \description{
-Title
+Calculate the correlation coefficient between two PWM's.
 }
 \examples{
 # Load sample data
 data(rbfox2_pwms)
 
 # Get the correlation between both PWMs
-cor.pwm(rbfox2_pwms[[1]], rbfox2_pwms[[2]], kmer = 5)
+cor.pwm(rbfox2_pwms$pwm[[1]], rbfox2_pwms$pwm[[2]], kmer = 5)
 }

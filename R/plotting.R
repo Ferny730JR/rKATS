@@ -54,7 +54,8 @@ get_pwms <- function(df, num_pwms=1, limit=Inf, limit_per_logo=Inf, type=c("DNA"
 
   # Get the primary PWM
   df_aligned <- align_kmers(df, limit = limit_per_logo)
-  logo_list <- list(create_sequence_logo(df_aligned, type = type[1]))
+  pwm_list <- list(create_sequence_logo(df_aligned, type = type[1]))
+  n_list <- list(nrow(df_aligned))
 
   # Get the alternative PWMs
   cur_logo <- 1
@@ -62,15 +63,19 @@ get_pwms <- function(df, num_pwms=1, limit=Inf, limit_per_logo=Inf, type=c("DNA"
     df_aligned$kmer <- gsub("-","",df_aligned$kmer)
     df <- subset(df, !df$kmer %in% df_aligned$kmer)
     if(nrow(df) == 0) {
+      logo_list<-list(pwm=pwm_list,n=n_list)
       return(logo_list)
     }
     df_aligned <- align_kmers(df, limit = limit_per_logo)
-    logo_list[[length(logo_list)+1]] <- create_sequence_logo(df_aligned, type=type[1])
+    pwm_list[[length(pwm_list)+1]] <- create_sequence_logo(df_aligned, type=type[1])
+    n_list[[length(n_list)+1]] <- nrow(df_aligned)
     cur_logo <- cur_logo + 1
   }
 
+  logo_list<-list(pwm=pwm_list,n=n_list)
   return(logo_list)
 }
+
 
 #' Plot sequence logo from a PWM
 #'
@@ -79,7 +84,7 @@ get_pwms <- function(df, num_pwms=1, limit=Inf, limit_per_logo=Inf, type=c("DNA"
 #' over the ggseqlogo package. For more complex plots or greater customization,
 #' see \link[ggseqlogo]{ggseqlogo} and \link[ggseqlogo]{geom_logo}
 #'
-#' @param pwm PWM you want to plot
+#' @param logo_list List of logos you want to plot
 #' @param ncol Number of columns
 #' @param method Use bits of probability method for sequence logo.
 #' @param title Title of the plot
@@ -95,21 +100,19 @@ get_pwms <- function(df, num_pwms=1, limit=Inf, limit_per_logo=Inf, type=c("DNA"
 #' # Load sample data
 #' data(rbfox2_pwms)
 #'
-#' # Plot single logo
-#' rbfox2_plot <- plot_logo(rbfox2_pwms[[1]])
-#' print(rbfox2_plot)
-#'
-#' # Plot single logo using probability
-#' rbfox2_plot <- plot_logo(rbfox2_pwms[[1]], method = "probability")
-#' print(rbfox2_plot)
-#'
 #' # Plot multiple logos
 #' rbfox2_plot <- plot_logo(rbfox2_pwms)
 #' print(rbfox2_plot)
-plot_logo <- function(pwm, ncol = NULL, method = c("bits","probability"),
+#'
+#' # Plot multiple logos using probability
+#' rbfox2_plot <- plot_logo(rbfox2_pwms, method = "probability")
+#' print(rbfox2_plot)
+plot_logo <- function(logo_list, ncol = NULL, method = c("bits","probability"),
                       title = "Weighted Sequence Logo", name = NULL, subtitle = NULL) {
+  pwm=logo_list[["pwm"]]
   if(is.null(subtitle)) {
-    facet.text <- element_blank()
+    names(pwm)<-paste("n=",logo_list[["n"]],sep="")
+    facet.text <- element_text(face="bold", angle=0, vjust=0.5,size=16)
   } else {
     if(!length(pwm)==length(subtitle)) {
       stop("'subtitle' and 'pwm' must be the same length")
@@ -259,7 +262,7 @@ align_kmers <- function(df, is_log2 = FALSE, limit = Inf) {
 
 
 
-#' Title
+#' Calculate the correlation coefficient between two PWM's.
 #'
 #' @param pwm1 Position Weight Matrix to correlate
 #' @param pwm2 Position Weight Matrix to correlate
@@ -272,13 +275,14 @@ align_kmers <- function(df, is_log2 = FALSE, limit = Inf) {
 #'
 #' @return Correlation coefficient of the PWM's
 #' @export
+#' @importFrom stats cor.test
 #'
 #' @examples
 #' # Load sample data
 #' data(rbfox2_pwms)
 #'
 #' # Get the correlation between both PWMs
-#' cor.pwm(rbfox2_pwms[[1]], rbfox2_pwms[[2]], kmer = 5)
+#' cor.pwm(rbfox2_pwms$pwm[[1]], rbfox2_pwms$pwm[[2]], kmer = 5)
 cor.pwm <- function(pwm1, pwm2, kmer, ret = c("cor", "pwm")) {
   pwm1_len <- ncol(pwm1)
   pwm2_len <- ncol(pwm2)

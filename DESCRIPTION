@@ -6,11 +6,18 @@ Authors@R:
            comment = c(ORCID = "0009-0000-1804-9601"))
 Author: Francisco F Cavazos [aut, cre]
 Maintainer: Francisco F Cavazos <francisco.cavazos03@gmail.com>
-Description: This package is for being able to test the C api within R.
+Description: A suite of tools for k-mer based analysis of 
+    sequence. Tools such as, streaming based k-mer counting and enrichment
+    analysis, motif identification and plotting, and more.
 Depends: 
     ggplot2,
     ggseqlogo,
-    R (>= 2.10)
+    R (>= 2.10),
+    gtable,
+    lifecycle,
+    rlang,
+    scales,
+    vctrs
 Imports: stringr, stats
 SystemRequirements: cmake (>= 3.7.1)
 LazyData: true
