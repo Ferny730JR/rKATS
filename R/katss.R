@@ -1,16 +1,27 @@
-#' K-mer counting
+#' K-mer Counting
 #'
-#' Count the k-mers in a fastq, fasta, or raw sequences file.
+#' Count the k-mers in a fastq, fasta, or raw sequences file
 #'
 #' @param file Name of the file which you want to count k-mers from
-#' The file has to be of either: raw sequences, fasta, or fastq format. Other
-#' file types are currently unsupported and will not work properly if used.
+#' The file has to be of either: raw sequences, fasta, or fastq format. Works
+#' with files using gzip compression. Other file types are currently unsupported
+#' and will not work properly if used.
 #' @param kmer Length of the k-mer you want to count. Currently, only k-mers up
 #' to length 16 are supported.
+#' @param klet Specify the k-let length to preserve during shuffling. This only
+#' affects the output is `algo="shuffled"` is set. -1 chooses the default value.
+#' @param sort Sort based on the counts from highest to lowest. Currently,
+#' the output given is sorted based on kmers (AA... first, TT... last).
+#' @param bootstrap_iters Number of iterations to bootstrap
+#' @param sample Percent to subsample during bootstrap (should be between 0-100%)
+#' @param algo Whether to perform regular counts, or count shuffled sequences
+#' @param seed Specify the seed to be used by bootstrap. Since bootstrap
+#' subsamples random sequences, seeding alters which random sequences will be
+#' picked. This helps to ensure deterministic output which can be achieved by
+#' using the same seed. To pick a random seed, set `seed=-1`.
+#' @param threads Number of threads to use. Currently not well optimized.
 #'
 #' @return Dataframe containing the counts for all k-mers
-#'
-#' @export
 #' @useDynLib rkatss, .registration = TRUE
 #'
 #' @examples
@@ -26,15 +37,53 @@
 #' # Count mono-nucleotide in file
 #' count_kmers(tf, kmer = 1)
 #' unlink(tf)
-count_kmers <- function(file, kmer = 3) {
+# count_kmers <- function(file, kmer = 3) {
+#  if(!is.character(file))
+#    stop("file must be a character string")
+#  if(!is.numeric(kmer) && kmer %% 1 != 0) {
+#    stop("kmer must be an integer")
+#  }
+#
+#  file <- path.expand(as.character(file))
+#  return(.Call("count_kmers_R", file, as.integer(kmer)))
+count_kmers <- function(file, kmer = 3, klet = -1, sort = FALSE, bootstrap_iters = 0, sample = 25,
+                        algo=c("regular","shuffled"), seed = 1, threads = 1) {
   if(!is.character(file))
     stop("file must be a character string")
-  if(!is.numeric(kmer) && kmer %% 1 != 0) {
+  if(!is.numeric(kmer) && kmer %% 1 != 0)
     stop("kmer must be an integer")
+  if(!is.numeric(klet) && klet %% 1 != 0)
+    stop("klet must be an integer")
+  if(!is.numeric(bootstrap_iters) && bootstrap_iters %% 1 != 0)
+    stop("bootstrap_iters must be an integer")
+  if(sample <= 0 && 100 < sample)
+    stop("sample must be a number between 0-100")
+  if(!is.numeric(seed) && seed %% 1 != 0)
+    stop("seed must be an integer")
+  if(!is.numeric(threads) && threads %% 1 != 0)
+    stop("threads must be an integer")
+  sample = as.integer((sample*1000) %% 100000)
+  algo <- match.arg(algo)
+  if(algo == "regular") {
+    algo <- 1
+  } else {
+    algo <- 2
   }
 
+
   file <- path.expand(as.character(file))
-  return(.Call("count_kmers_R", file, as.integer(kmer)))
+  return(.Call("count_kmers_R",
+               file,
+               as.integer(kmer),
+               as.integer(klet),
+               as.integer(sort),
+               as.integer(bootstrap_iters),
+               as.integer(sample),
+               as.integer(algo),
+               as.integer(seed),
+               as.integer(threads)
+               )
+         )
 }
 
 
