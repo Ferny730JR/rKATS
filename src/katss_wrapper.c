@@ -16,6 +16,11 @@
 SEXP
 katssdata_to_df(KatssData *data, KatssOptions *opts, int algo)
 {
+	/* Ensure data was succesfully obtained, return null otherwise */
+	if(data == NULL)
+		return R_NilValue;
+	
+	/* Size of the data.frame */
 	uint64_t capacity = data->num_kmers;
 
 	/* Dataframe that will store data */
@@ -137,16 +142,14 @@ count_kmers_R(SEXP filename, SEXP kmer, SEXP klet, SEXP sort, SEXP iters,
 	opts.seed = INTEGER(seed)[0];
 	opts.threads = INTEGER(threads)[0];
 	opts.enable_warnings = true;
-	if(INTEGER(algo)[0] == 1) {
-		opts.probs_algo = KATSS_PROBS_NONE;
-	} else {
-		opts.probs_algo = KATSS_PROBS_USHUFFLE;
+	switch(INTEGER(algo)[0]) {
+	case 1: opts.probs_algo = KATSS_PROBS_NONE;
+	case 2: opts.probs_algo = KATSS_PROBS_USHUFFLE;
+	default: return R_NilValue; // branch shouldn't be reached but silences warnings
 	}
 
 	/* Compute the results */
 	KatssData *result = katss_count(c_filename, &opts);
-	if(result == NULL)
-		return R_NilValue;
 
 	/* Turn result into an R data.frame and return it */
 	return katssdata_to_df(result, &opts, ALGO_COUNT);
@@ -183,8 +186,6 @@ enrichments_R(SEXP test, SEXP ctrl, SEXP kmer, SEXP algo, SEXP bs_iters,
 
 	/* Compute the result */
 	KatssData *result = katss_enrichment(test_name, ctrl_name, &opts);
-	if(result == NULL)
-		return R_NilValue;
 
 	/* Turn result into an R data.frame and return it */
 	return katssdata_to_df(result, &opts, ALGO_RVALS);
