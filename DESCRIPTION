@@ -12,7 +12,7 @@ Description: Analyze RNA sequences and identify enriched motifs in protein-bound
 Depends: 
     ggplot2,
     ggseqlogo,
-    R (>= 2.10),
+    R (>= 3.5),
     gtable,
     lifecycle,
     rlang,
