@@ -51,4 +51,6 @@ set(COMPRESSION_LIB ZLIB::ZLIB)
 set(COMPRESSION_INC "")
 
 set(CMAKE_C_FLAGS_DEBUG "-O0 -ggdb3")
+
+# Begin building source code
 add_subdirectory(source)

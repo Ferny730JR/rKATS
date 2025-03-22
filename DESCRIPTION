@@ -1,14 +1,14 @@
 Package: rkatss
 Title: R wrapper for the KATSS package
-Version: 0.0.0.9000
+Version: 0.0.0.9001
 Authors@R: 
     person("Francisco", "Cavazos", , "francisco.cavazos03@gmail.com", role = c("aut", "cre"),
            comment = c(ORCID = "0009-0000-1804-9601"))
 Author: Francisco F Cavazos [aut, cre]
 Maintainer: Francisco F Cavazos <francisco.cavazos03@gmail.com>
-Description: A suite of tools for k-mer based analysis of 
-    sequence. Tools such as, streaming based k-mer counting and enrichment
-    analysis, motif identification and plotting, and more.
+Description: Analyze RNA sequences and identify enriched motifs in protein-bound
+    RNA. The package comes with functions for k-mer counting, enrichment
+    calculations, k-mer alignment, and plotting utilities.
 Depends: 
     ggplot2,
     ggseqlogo,
