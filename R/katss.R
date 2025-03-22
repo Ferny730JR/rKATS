@@ -23,6 +23,7 @@
 #'
 #' @return Dataframe containing the counts for all k-mers
 #' @useDynLib rkatss, .registration = TRUE
+#' @export
 #'
 #' @examples
 #' # Create temporary file with sequences
@@ -62,6 +63,7 @@ count_kmers <- function(file, kmer = 3, klet = -1, sort = FALSE, bootstrap_iters
     stop("seed must be an integer")
   if(!is.numeric(threads) && threads %% 1 != 0)
     stop("threads must be an integer")
+  file <- path.expand(as.character(file))
   sample = as.integer((sample*1000) %% 100000)
   algo <- match.arg(algo)
   if(algo == "regular") {
@@ -70,8 +72,6 @@ count_kmers <- function(file, kmer = 3, klet = -1, sort = FALSE, bootstrap_iters
     algo <- 2
   }
 
-
-  file <- path.expand(as.character(file))
   return(.Call("count_kmers_R",
                file,
                as.integer(kmer),

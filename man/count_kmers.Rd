@@ -2,23 +2,53 @@
 % Please edit documentation in R/katss.R
 \name{count_kmers}
 \alias{count_kmers}
-\title{K-mer counting}
+\title{K-mer Counting}
 \usage{
-count_kmers(file, kmer = 3)
+count_kmers(
+  file,
+  kmer = 3,
+  klet = -1,
+  sort = FALSE,
+  bootstrap_iters = 0,
+  sample = 25,
+  algo = c("regular", "shuffled"),
+  seed = 1,
+  threads = 1
+)
 }
 \arguments{
 \item{file}{Name of the file which you want to count k-mers from
-The file has to be of either: raw sequences, fasta, or fastq format. Other
-file types are currently unsupported and will not work properly if used.}
+The file has to be of either: raw sequences, fasta, or fastq format. Works
+with files using gzip compression. Other file types are currently unsupported
+and will not work properly if used.}
 
 \item{kmer}{Length of the k-mer you want to count. Currently, only k-mers up
 to length 16 are supported.}
+
+\item{klet}{Specify the k-let length to preserve during shuffling. This only
+affects the output is \code{algo="shuffled"} is set. -1 chooses the default value.}
+
+\item{sort}{Sort based on the counts from highest to lowest. Currently,
+the output given is sorted based on kmers (AA... first, TT... last).}
+
+\item{bootstrap_iters}{Number of iterations to bootstrap}
+
+\item{sample}{Percent to subsample during bootstrap (should be between 0-100\%)}
+
+\item{algo}{Whether to perform regular counts, or count shuffled sequences}
+
+\item{seed}{Specify the seed to be used by bootstrap. Since bootstrap
+subsamples random sequences, seeding alters which random sequences will be
+picked. This helps to ensure deterministic output which can be achieved by
+using the same seed. To pick a random seed, set \code{seed=-1}.}
+
+\item{threads}{Number of threads to use. Currently not well optimized.}
 }
 \value{
 Dataframe containing the counts for all k-mers
 }
 \description{
-Count the k-mers in a fastq, fasta, or raw sequences file.
+Count the k-mers in a fastq, fasta, or raw sequences file
 }
 \examples{
 # Create temporary file with sequences
