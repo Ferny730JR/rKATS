@@ -8,17 +8,17 @@
 #' and will not work properly if used.
 #' @param kmer Length of the k-mer you want to count. Currently, only k-mers up
 #' to length 16 are supported.
-#' @param klet Specify the k-let length to preserve during shuffling. This only
-#' affects the output is `algo="shuffled"` is set. -1 chooses the default value.
-#' @param sort Sort based on the counts from highest to lowest. Currently,
-#' the output given is sorted based on kmers (AA... first, TT... last).
+#' @param algo Whether to perform regular counts, or count shuffled sequences
 #' @param bootstrap_iters Number of iterations to bootstrap
 #' @param sample Percent to subsample during bootstrap (should be between 0-100%)
-#' @param algo Whether to perform regular counts, or count shuffled sequences
 #' @param seed Specify the seed to be used by bootstrap. Since bootstrap
 #' subsamples random sequences, seeding alters which random sequences will be
 #' picked. This helps to ensure deterministic output which can be achieved by
 #' using the same seed. To pick a random seed, set `seed=-1`.
+#' @param klet Specify the k-let length to preserve during shuffling. This only
+#' affects the output is `algo="shuffled"` is set. -1 chooses the default value.
+#' @param sort Sort based on the counts from highest to lowest. Currently,
+#' the output given is sorted based on kmers (AA... first, TT... last).
 #' @param threads Number of threads to use. Currently not well optimized.
 #'
 #' @return Dataframe containing the counts for all k-mers
@@ -27,10 +27,9 @@
 #'
 #' @examples
 #' # Create temporary file with sequences
-#' set.seed(1)
-#' test1 <- do.call(paste0, replicate(50, sample(c("A","C","G","T"), 1000, TRUE), FALSE))
+#' data(rbfox2_seqs)
 #' tf <- tempfile()
-#' writeLines(test1, tf)
+#' writeLines(rbfox2_seqs$bound, tf)
 #'
 #' # Count di-nucleotides in file
 #' count_kmers(tf, kmer = 2)
@@ -38,29 +37,48 @@
 #' # Count mono-nucleotide in file
 #' count_kmers(tf, kmer = 1)
 #' unlink(tf)
-# count_kmers <- function(file, kmer = 3) {
-#  if(!is.character(file))
-#    stop("file must be a character string")
-#  if(!is.numeric(kmer) && kmer %% 1 != 0) {
-#    stop("kmer must be an integer")
-#  }
-#
-#  file <- path.expand(as.character(file))
-#  return(.Call("count_kmers_R", file, as.integer(kmer)))
-count_kmers <- function(file, kmer = 3, klet = -1, sort = FALSE, bootstrap_iters = 0, sample = 25,
-                        algo=c("regular","shuffled"), seed = 1, threads = 1) {
+#'
+#' # Count shuffled kmers
+#' count_kmers(tf, kmer = 1, algo = "shuffled")
+#' 
+#' # Specify k-let to preserve during shuffling
+#' count_kmers(tf, kmer = 1, algo = "shuffled", klet = 2)
+#' 
+#' # Count bootstrap kmers
+#' result <- count_kmers(tf, bootstrap_iters = 100)
+#' head(result)
+#'
+#' # Subsample 55.55% of the file per bootstrap iteration
+#' result <- count_kmers(tf, bootstrap_iters = 100, sample = 55.55)
+#' head(result)
+#' 
+#' # Count bootstrap shuffled kmers
+#' result <- count_kmers(tf, algo = "shuffled", bootstrap_iters = 100)
+#' head(result)
+#' 
+#' # Sort by count
+#' result <- count_kmers(tf, kmer = 5, sort = TRUE)
+#' head(result)
+#' 
+#' # Cleanup file
+#' unlink(tf)
+count_kmers <- function(file, kmer = 3, algo=c("regular","shuffled"),
+                        bootstrap_iters = 0, sample = 25, seed = -1, klet = -1, 
+                        sort = FALSE, threads = 1) {
   if(!is.character(file))
     stop("file must be a character string")
   if(!is.numeric(kmer) || kmer %% 1 != 0)
     stop("kmer must be an integer")
-  if(!is.numeric(klet) || klet %% 1 != 0)
-    stop("klet must be an integer")
   if(!is.numeric(bootstrap_iters) || bootstrap_iters %% 1 != 0)
     stop("bootstrap_iters must be an integer")
   if(!is.numeric(sample) || sample <= 0 || 100 < sample)
     stop("sample must be a number between 0-100")
   if(!is.numeric(seed) && seed %% 1 != 0)
     stop("seed must be an integer")
+  if(!is.numeric(klet) || klet %% 1 != 0)
+    stop("klet must be an integer")
+  if(!is.logical(sort))
+    stop("sort must be logical")
   if(!is.numeric(threads) && threads %% 1 != 0)
     stop("threads must be an integer")
   file <- path.expand(as.character(file))
