@@ -51,20 +51,20 @@ count_kmers <- function(file, kmer = 3, klet = -1, sort = FALSE, bootstrap_iters
                         algo=c("regular","shuffled"), seed = 1, threads = 1) {
   if(!is.character(file))
     stop("file must be a character string")
-  if(!is.numeric(kmer) && kmer %% 1 != 0)
+  if(!is.numeric(kmer) || kmer %% 1 != 0)
     stop("kmer must be an integer")
-  if(!is.numeric(klet) && klet %% 1 != 0)
+  if(!is.numeric(klet) || klet %% 1 != 0)
     stop("klet must be an integer")
-  if(!is.numeric(bootstrap_iters) && bootstrap_iters %% 1 != 0)
+  if(!is.numeric(bootstrap_iters) || bootstrap_iters %% 1 != 0)
     stop("bootstrap_iters must be an integer")
-  if(sample <= 0 && 100 < sample)
+  if(!is.numeric(sample) || sample <= 0 || 100 < sample)
     stop("sample must be a number between 0-100")
   if(!is.numeric(seed) && seed %% 1 != 0)
     stop("seed must be an integer")
   if(!is.numeric(threads) && threads %% 1 != 0)
     stop("threads must be an integer")
   file <- path.expand(as.character(file))
-  sample = as.integer((sample*1000) %% 100000)
+  sample = as.integer((sample*1000) %% 100001)
   algo <- match.arg(algo)
   if(algo == "regular") {
     algo <- 1
@@ -89,14 +89,28 @@ count_kmers <- function(file, kmer = 3, klet = -1, sort = FALSE, bootstrap_iters
 
 #' Calculate k-mer enrichments
 #'
-#' @param testfile Test sequences
-#' @param ctrlfile Control sequences
-#' @param kmer     Length of kmer
-#' @param normalize Get log2 of enrichments
-#' @param probabilistic Compute probabilistic enrichments
-#' @param verbose Verbose output for calculations
+#' @param testfile Test sequences. The file has to be of either: raw sequences,
+#' fasta, or fastq format. Works with files using gzip compression. Other file
+#' types are currently unsupported.
+#' @param ctrlfile Control sequences (optional). Same formats as testfile.
+#' @param kmer Length of the k-mer to compute enrichments for. Currently, only
+#' k-mers up to length 16 are supported.
+#' @param algo The algorithm to use for computing enrichments
+#' @param bootstrap_iters Number of iterations to bootstrap
+#' @param sample Percent to subsample during bootstrap (should be between 0-100%)
+#' @param seed Specify the seed to be used by bootstrap. Since bootstrap
+#' subsamples random sequences, seeding alters which random sequences will be
+#' picked. This helps to ensure deterministic output which can be achieved by
+#' using the same seed. To pick a random seed, set `seed=-1`.
+#' @param klet Specify the k-let length to preserve during shuffling. This only
+#' affects the output is `algo="shuffled"` or `algo=shuf+prob` is set. -1 
+#' chooses the default recommended value.
+#' @param sort Sort data.frame based on the counts from highest to lowest. 
+#' Currently, the output given is sorted alphabeticaly based on kmers.
+#' @param threads Number of threads to use. Currently not well optimized/not
+#' working.
 #'
-#' @return dataframe containing enrichments
+#' @return data.frame containing the k-mer enrichments
 #' @useDynLib rkatss, .registration = TRUE
 #' @export
 #'
@@ -104,64 +118,105 @@ count_kmers <- function(file, kmer = 3, klet = -1, sort = FALSE, bootstrap_iters
 #' # Load data
 #' data(rbfox2_seqs)
 #'
-#' test_seqs <- tempfile()
-#' writeLines(rbfox2_seqs$bound, test_seqs)
+#' # Create raw sequence files
+#' test_file <- tempfile()
+#' ctrl_file <- tempfile()
+#' writeLines(rbfox2_seqs$bound, test_file)
+#' writeLines(rbfox2_seqs$input, ctrl_file)
 #'
-#' # Get the enrichments without a control
-#' result <- enrichments(test_seqs, probabilistic = TRUE)
+#' ## Get enrichments when you have a test and control dataset
+#'   # Default configuration
+#' result <- enrichments(test_file, ctrl_file)
+#' head(result)
+#'   # Modify the k-mer length
+#' result <- enrichments(test_file, ctrl_file, kmer = 5)
+#' head(result)
+#' 
+#' 
+#' ## Get the enrichments without a control
+#'   # Shuffling (preferred)
+#' result <- enrichments(test_file, algo="shuffled", kmer = 5)
+#' head(result)
+#'   # Shuffling with custom k-let
+#' result <- enrichments(test_file, algo="shuffled", kmer = 5, klet = 5)
+#' head(result)
+#'   # Probabilistic
+#' result <- enrichments(test_file, algo="probabilistic", kmer = 5)
+#' head(result)
+#' 
+#' 
+#' ## Enabling bootstrap
+#'   # Bootstrap on regular enrichments for 100 iterations
+#' result <- enrichments(test_file, ctrl_file, bootstrap_iters = 100)
+#' head(result)
+#'   # Setting the sample size to be 55.55% of sequences per bootstrap iteration
+#' result <- enrichments(test_file, ctrl_file, bootstrap_iters = 100, sample = 55.55)
+#' head(result)
+#'   # Bootstrap shuffled where kmer = klet
+#' result <- enrichments(test_file, algo = "shuffled", bootstrap_iters = 100, kmer = 5, klet = 5)
 #' head(result)
 #'
-#' # Get the 5-mer enrichments
-#' result <- enrichments(test_seqs, kmer = 5, probabilistic = TRUE)
-#' head(result)
-#'
-#' ctrl_seqs <- tempfile()
-#' writeLines(rbfox2_seqs$input, ctrl_seqs)
-#'
-#' # Get the enrichments when you have a control
-#' result <- enrichments(test_seqs, ctrl_seqs, kmer = 5)
-#' head(result)
-#'
-#' # Normalize enrichments to log2
-#' result <- enrichments(test_seqs, ctrl_seqs, kmer = 5, normalize = TRUE)
-#' head(result)
-#' tail(result)
-#'
-#' unlink(test_seqs)
-#' unlink(ctrl_seqs)
-enrichments <- function(testfile, ctrlfile = NULL, kmer = 3, probabilistic = FALSE,
-                        normalize = FALSE, verbose = FALSE) {
+#' # Cleanup files
+#' unlink(test_file)
+#' unlink(ctrl_file)
+enrichments <- function(testfile, ctrlfile = NULL, kmer = 3, 
+                        algo = c("normal", "shuffled", "probabilistic", "shuf+prob"),
+                        bootstrap_iters = 0, sample = 25, seed = -1, klet = -1,
+                        sort = TRUE, threads = 1)
+{
   if(!is.character(testfile))
     stop("testfile must be a character string")
   if(!is.character(ctrlfile) && !is.null(ctrlfile))
     stop("ctrlfile must be a character string or NULL")
   if(!is.numeric(kmer) || kmer %% 1 != 0)
     stop("kmer must be an integer")
-  if(!is.logical(probabilistic))
-    stop("probabilistic must be either TRUE or FALSE")
-  if(!is.logical(normalize))
-    stop("normalize must be either TRUE or FALSE ")
-  if(!is.logical(verbose))
-    stop("verbose must be either TRUE or FALSE")
-
-  if(probabilistic && is.character(ctrlfile))
-    warning("Ignoring ctrlfile argument")
-  if(!probabilistic && is.null(ctrlfile))
-    stop("ctrlfile is required when computing non-probabilistic enrichments")
+  if(!is.numeric(bootstrap_iters) || bootstrap_iters %% 1 != 0)
+    stop("bootstrap_iters must be an integer")
+  if(!is.numeric(sample) || sample <= 0 || 100 < sample)
+    stop("sample must be a number between 0-100")
+  if(!is.numeric(seed) || seed %% 1 != 0)
+    stop("seed must be an integer")
+  if(!is.numeric(klet) || klet %% 1 != 0)
+    stop("klet must be an integer")
+  if(!is.logical(sort))
+    stop("sort must be logical")
+  if(!is.numeric(threads) || threads %% 1 != 0)
+    stop("threads must be an integer")
   if(16 >= kmer && kmer>12) {
     menu_title = paste(convert_bytes(4^kmer * 176), "Are you sure you want to proceed?")
     if(utils::menu(c("Yes", "No! Fix your program!"), title = menu_title) == 2)
       return(NULL)
   }
-
+  
   # Done with argument checks, expand filepaths if necessary
   testfile <- path.expand(as.character(testfile))
   if(!is.null(ctrlfile))
     ctrlfile <- path.expand(as.character(ctrlfile))
+  algo <- match.arg(algo)
+  sample = as.integer((sample*1000) %% 100001)
+  if(algo == "normal") {
+    algo <- 0
+  } else if(algo == "shuffled") {
+    algo <- 1
+  } else if(algo == "probabilistic") {
+    algo <- 2
+  } else if(algo == "shuf+prob") {
+    algo <- 3
+  }
 
-  # Do calculations in C and return
-  return(.Call("enrichments_R", testfile, ctrlfile, as.integer(kmer),
-               probabilistic, normalize, verbose))
+  return(.Call("enrichments_R",
+               testfile,
+               ctrlfile,
+               as.integer(kmer),
+               as.integer(algo),
+               as.integer(bootstrap_iters),
+               as.integer(sample),
+               as.integer(seed),
+               as.integer(klet),
+               as.integer(sort),
+               as.integer(threads)
+               )
+         )
 }
 
 

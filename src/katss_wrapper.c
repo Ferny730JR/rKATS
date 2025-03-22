@@ -46,7 +46,7 @@ katssdata_to_df(KatssData *data, KatssOptions *opts, int algo)
 	char *kseq = s_malloc(opts->kmer + 1); // where kmer str will be stored
 	for(uint64_t i=0; i < data->num_kmers; i++) {
 		/* Set the kmer string in dataframe */
-		katss_unhash(kseq, (uint32_t)i, opts->kmer, true);
+		katss_unhash(kseq, data->kmers[i].kmer, opts->kmer, true);
 		SET_STRING_ELT(kmers, i, mkChar(kseq));
 
 		/* Write values */
@@ -115,6 +115,8 @@ katssdata_to_df(KatssData *data, KatssOptions *opts, int algo)
 	/* Return data.frame */
 	return df;
 }
+
+
 // Function to convert R inputs to C and call count_kmers
 SEXP
 count_kmers_R(SEXP filename, SEXP kmer, SEXP klet, SEXP sort, SEXP iters, 
@@ -148,89 +150,48 @@ count_kmers_R(SEXP filename, SEXP kmer, SEXP klet, SEXP sort, SEXP iters,
 
 	/* Turn result into an R data.frame and return it */
 	return katssdata_to_df(result, &opts, ALGO_COUNT);
-	// return R_NilValue;
 }
 
 
-/* Function to convert R inputs to C and call katss_enrichments */
 SEXP
-enrichments_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP probabilistic, 
-              SEXP normalize, SEXP verbose)
+enrichments_R(SEXP test, SEXP ctrl, SEXP kmer, SEXP algo, SEXP bs_iters, 
+              SEXP bs_sample, SEXP seed, SEXP klet, SEXP sort, SEXP threads)
 {
-	const char *test_filename = CHAR(STRING_ELT(test_file, 0));
-	unsigned int c_kmer = INTEGER(kmer)[0];
-	bool c_normalize = asLogical(normalize) == TRUE;
-	bool c_verbose = asLogical(verbose);
+	const char *test_name = CHAR(STRING_ELT(test, 0));
+	const char *ctrl_name = isNull(ctrl) ? NULL : CHAR(STRING_ELT(ctrl, 0));
 
-	/* Compute the actual enrichments */
-	KatssEnrichments *result;
-	if(c_verbose)
-		Rprintf("Begin calculating enrichments...\n");
+	/* Initialize the options */
+	KatssOptions opts;
+	katss_init_options(&opts);
 
-	if(asLogical(probabilistic) == TRUE)
-		result = katss_prob_enrichments(test_filename, c_kmer, c_normalize);
-	else {
-		const char *ctrl_filename = CHAR(STRING_ELT(ctrl_file, 0));
-		result = katss_enrichments(test_filename, ctrl_filename, c_kmer, c_normalize);
+	/* Modify the options based on input */
+	opts.kmer             = INTEGER(kmer)[0];
+	opts.bootstrap_iters  = INTEGER(bs_iters)[0];
+	opts.bootstrap_sample = INTEGER(bs_sample)[0];
+	opts.seed             = INTEGER(seed)[0];
+	opts.probs_ntprec     = INTEGER(klet)[0];
+	opts.sort_enrichments = INTEGER(sort)[0];
+	opts.threads          = INTEGER(threads)[0];
+	opts.enable_warnings  = true;
+	switch(INTEGER(algo)[0]) {
+	case 0: opts.probs_algo = KATSS_PROBS_NONE;     break;
+	case 1: opts.probs_algo = KATSS_PROBS_USHUFFLE; break;
+	case 2: opts.probs_algo = KATSS_PROBS_REGULAR;  break;
+	case 3: opts.probs_algo = KATSS_PROBS_BOTH;     break;
+	default: return R_NilValue; // this shouldn't happen tbh
 	}
 
-	/* If enrichments failed for whatever reason, return NULL */
-	if(result == NULL) {
-		Rprintf("Begin calculating enrichments... Failure\n");
+	/* Compute the result */
+	KatssData *result = katss_enrichment(test_name, ctrl_name, &opts);
+	if(result == NULL)
 		return R_NilValue;
-	}
-	if(c_verbose)
-		Rprintf("Begin calculating enrichments... Success\n"
-		        "Creating data.frame...\n");
 
-	uint64_t capacity = (uint64_t)result->num_enrichments;
-
-	SEXP counts_r = PROTECT(allocVector(REALSXP, capacity));
-	SEXP kmer_strings = PROTECT(allocVector(STRSXP, capacity));
-	double *counts_r_ptr = REAL(counts_r);
-
-	// copy the contents of counts into the R vector
-	for(uint32_t i=0; i < capacity; i++) {
-		/* Set k-mer enrichment */
-		counts_r_ptr[i] = result->enrichments[i].enrichment;
-
-		/* Set k-mer string */
-		char kseq[c_kmer + 1U];
-		katss_unhash(kseq, result->enrichments[i].key, c_kmer, 1);
-		SET_STRING_ELT(kmer_strings, i, mkChar(kseq));
-	}
-
-	/* Free enrichments */
-	katss_free_enrichments(result);
-
-	/* Create data.frame from k-mer strings and counts */
-	SEXP df = PROTECT(allocVector(VECSXP, 2));
-	SET_VECTOR_ELT(df, 0, kmer_strings);
-	SET_VECTOR_ELT(df, 1, counts_r);
-
-	/* Set column names for the data.frame */
-	SEXP col_names = PROTECT(allocVector(STRSXP, 2));
-	SET_STRING_ELT(col_names, 0, mkChar("kmer"));
-	SET_STRING_ELT(col_names, 1, mkChar("rval"));
-	setAttrib(df, R_NamesSymbol, col_names);
-
-	/* Set class attribute to "data.frame" */
-	SEXP row_names = PROTECT(allocVector(INTSXP, capacity));
-	for(uint32_t i=0; i < capacity; i++) {
-		INTEGER(row_names)[i] = i+1;
-	}
-	setAttrib(df, R_RowNamesSymbol, row_names);
-	setAttrib(df, R_ClassSymbol, mkString("data.frame"));
-
-	UNPROTECT(5);
-
-	if(c_verbose)
-		Rprintf("Creating data.frame... Success\n");
-	return df;
+	/* Turn result into an R data.frame and return it */
+	return katssdata_to_df(result, &opts, ALGO_RVALS);
 }
 
 
-/* ikkr_R: C wrapper to perform iterative k-mer knockout enrichments in R */
+/* ikke_R: C wrapper to perform iterative k-mer knockout enrichments in R */
 SEXP
 ikke_R(SEXP test_file, SEXP ctrl_file, SEXP kmer, SEXP iterations, SEXP probabilistic,
        SEXP normalize, SEXP threads)
