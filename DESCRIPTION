@@ -1,9 +1,19 @@
 Package: rkatss
 Title: R wrapper for the KATSS package
-Version: 0.0.0.9001
-Authors@R: 
-    person("Francisco", "Cavazos", , "francisco.cavazos03@gmail.com", role = c("aut", "cre"),
+Version: 0.9.0
+Authors@R: c(
+    person(given = "Francisco F",
+           family = "Cavazos",
+           role = c("aut", "cre"),
+           email = "francisco.cavazos03@gmail.com",
            comment = c(ORCID = "0009-0000-1804-9601"))
+    person(given = "Yue",
+           family = "Hu",
+           role = c("aut"))
+    person(given = "Daniel",
+           family = "Dominguez",
+           role = c("aut"))
+    )
 Author: Francisco F Cavazos [aut, cre]
 Maintainer: Francisco F Cavazos <francisco.cavazos03@gmail.com>
 Description: Analyze RNA sequences and identify enriched motifs in protein-bound
