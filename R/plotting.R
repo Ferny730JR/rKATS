@@ -19,7 +19,8 @@
 #' @param limit_per_logo Number of rows to use per logo
 #' @param type Sequence type. Can be one of either 'DNA' or 'RNA'
 #'
-#' @return List of PWMs
+#' @return List of PWMs, containing 'n', the number of kmers in the pwm, and
+#' 'pwm', the values of the PWM.
 #' @export
 #'
 #' @examples
@@ -108,11 +109,23 @@ get_pwms <- function(df, num_pwms=1, limit=Inf, limit_per_logo=Inf, type=c("DNA"
 #' rbfox2_plot <- plot_logo(rbfox2_pwms, method = "probability")
 #' print(rbfox2_plot)
 plot_logo <- function(logo_list, ncol = NULL, method = c("bits","probability"),
-                      title = "Weighted Sequence Logo", name = NULL, subtitle = NULL) {
-  pwm=logo_list[["pwm"]]
+                      title = "Weighted Sequence Logo", name = NULL, 
+                      subtitle = NULL) {
+  if(is.list(logo_list)){
+    pwm=logo_list[["pwm"]]
+  } else{
+    pwm=logo_list
+  }
+
   if(is.null(subtitle)) {
-    names(pwm)<-paste("n=",logo_list[["n"]],sep="")
-    facet.text <- element_text(face="bold", angle=0, vjust=0.5,size=16)
+    facet.text <- element_blank()
+  } else if(subtitle[[1]]=="n"){
+    if(is.list(logo_list)){
+      names(pwm)<-paste("n=",logo_list[["n"]],sep="")
+      facet.text <- element_text(face="bold", angle=0, vjust=0.5,size=16)
+    } else {
+      facet.text <- element_blank()
+    }
   } else {
     if(!length(pwm)==length(subtitle)) {
       stop("'subtitle' and 'pwm' must be the same length")
@@ -259,7 +272,6 @@ align_kmers <- function(df, is_log2 = FALSE, limit = Inf) {
 
   return(df)
 }
-
 
 
 #' Calculate the correlation coefficient between two PWM's.
