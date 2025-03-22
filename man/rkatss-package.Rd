@@ -6,7 +6,7 @@
 \alias{rkatss-package}
 \title{rkatss: R wrapper for the KATSS package}
 \description{
-A suite of tools for k-mer based analysis of sequence. Tools such as, streaming based k-mer counting and enrichment analysis, motif identification and plotting, and more.
+Analyze RNA sequences and identify enriched motifs in protein-bound RNA. The package comes with functions for k-mer counting, enrichment calculations, k-mer alignment, and plotting utilities.
 }
 \author{
 \strong{Maintainer}: Francisco Cavazos \email{francisco.cavazos03@gmail.com} (\href{https://orcid.org/0009-0000-1804-9601}{ORCID})
