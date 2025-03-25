@@ -143,8 +143,8 @@ count_kmers_R(SEXP filename, SEXP kmer, SEXP klet, SEXP sort, SEXP iters,
 	opts.threads = INTEGER(threads)[0];
 	opts.enable_warnings = true;
 	switch(INTEGER(algo)[0]) {
-	case 1: opts.probs_algo = KATSS_PROBS_NONE;
-	case 2: opts.probs_algo = KATSS_PROBS_USHUFFLE;
+	case 1: opts.probs_algo = KATSS_PROBS_NONE;     break;
+	case 2: opts.probs_algo = KATSS_PROBS_USHUFFLE; break;
 	default: return R_NilValue; // branch shouldn't be reached but silences warnings
 	}
 
