@@ -37,7 +37,7 @@ endif(SEQF_BUILD_SHARED)
 
 # Create static library
 if(SEQF_BUILD_STATIC)
-	add_library(seqf_static OBJECT ${SEQF_SRCS})
+	add_library(seqf_static STATIC ${SEQF_SRCS})
 
 	target_include_directories(seqf_static PUBLIC
 		${CMAKE_CURRENT_SOURCE_DIR} ${SEQF_INCLUDE_DIR} ${COMPRESSION_INC})
@@ -48,9 +48,15 @@ if(SEQF_BUILD_STATIC)
 	target_compile_definitions(seqf_static PRIVATE
 		_HAS_ISA_L_=$<BOOL:${KATSS_HAS_ISA_L}>)
 
-	set_target_properties(seqf_static PROPERTIES
-		VERSION ${PROJECT_VERSION}
-		OUTPUT_NAME seqf)
+	if(WIN32)
+		set_target_properties(seqf_static PROPERTIES
+			VERSION ${PROJECT_VERSION}
+			OUTPUT_NAME seqf_static)
+	else()
+		set_target_properties(seqf_static PROPERTIES
+			VERSION ${PROJECT_VERSION}
+			OUTPUT_NAME seqf)
+	endif()
 
 	if(ipo_is_supported)
 		set_property(TARGET seqf_static
