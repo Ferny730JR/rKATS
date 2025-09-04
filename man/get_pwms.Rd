@@ -25,7 +25,8 @@ complement enrichments/ikke function, so use their output.}
 \item{type}{Sequence type. Can be one of either 'DNA' or 'RNA'}
 }
 \value{
-List of PWMs
+List of PWMs, containing 'n', the number of kmers in the pwm, and
+'pwm', the values of the PWM.
 }
 \description{
 get_pwms is a simple method to compute the PWMs from k-mer enrichments. To

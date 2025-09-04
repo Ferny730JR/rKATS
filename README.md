@@ -1,4 +1,4 @@
-# RKATSS
+# rKATS
 
 An R wrapper for the KATSS package, containing programs to analyze RNA-protein
 interactions and provide plotting utilities.
@@ -16,4 +16,4 @@ allowing for:
 ## Install from GitHub
 
 To install the rkatss package from GitHub, you can simply do the following:
-remotes::install_github("Ferny730JR/rkatss")
+remotes::install_github("Ferny730JR/rKATS")

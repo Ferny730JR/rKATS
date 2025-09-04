@@ -22,7 +22,7 @@
 #' @param threads Number of threads to use. Currently not well optimized.
 #'
 #' @return Dataframe containing the counts for all k-mers
-#' @useDynLib rkatss, .registration = TRUE
+#' @useDynLib rkats, .registration = TRUE
 #' @export
 #'
 #' @examples
@@ -129,7 +129,7 @@ count_kmers <- function(file, kmer = 3, algo=c("regular","shuffled"),
 #' working.
 #'
 #' @return data.frame containing the k-mer enrichments
-#' @useDynLib rkatss, .registration = TRUE
+#' @useDynLib rkats, .registration = TRUE
 #' @export
 #'
 #' @examples
@@ -254,7 +254,7 @@ enrichments <- function(testfile, ctrlfile = NULL, kmer = 3,
 #' @param probabilistic Calculate probabilistic enrichments.
 #'
 #' @return data.frame containing the enrichments
-#' @useDynLib rkatss, .registration = TRUE
+#' @useDynLib rkats, .registration = TRUE
 #' @export
 #'
 #' @examples
@@ -339,7 +339,7 @@ ikke <- function(testfile, ctrlfile = NULL, kmer = 3, iterations = 10,
 #' @param all.matches Find all occurrences of search in sequence
 #'
 #' @return Index in which search was found, 0 if not found
-#' @useDynLib rkatss, .registration = TRUE
+#' @useDynLib rkats, .registration = TRUE
 #' @export
 #'
 #' @examples

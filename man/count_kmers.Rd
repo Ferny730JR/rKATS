@@ -7,12 +7,12 @@
 count_kmers(
   file,
   kmer = 3,
-  klet = -1,
-  sort = FALSE,
+  algo = c("regular", "shuffled"),
   bootstrap_iters = 0,
   sample = 25,
-  algo = c("regular", "shuffled"),
-  seed = 1,
+  seed = -1,
+  klet = -1,
+  sort = FALSE,
   threads = 1
 )
 }
@@ -25,22 +25,22 @@ and will not work properly if used.}
 \item{kmer}{Length of the k-mer you want to count. Currently, only k-mers up
 to length 16 are supported.}
 
-\item{klet}{Specify the k-let length to preserve during shuffling. This only
-affects the output is \code{algo="shuffled"} is set. -1 chooses the default value.}
-
-\item{sort}{Sort based on the counts from highest to lowest. Currently,
-the output given is sorted based on kmers (AA... first, TT... last).}
+\item{algo}{Whether to perform regular counts, or count shuffled sequences}
 
 \item{bootstrap_iters}{Number of iterations to bootstrap}
 
 \item{sample}{Percent to subsample during bootstrap (should be between 0-100\%)}
 
-\item{algo}{Whether to perform regular counts, or count shuffled sequences}
-
 \item{seed}{Specify the seed to be used by bootstrap. Since bootstrap
 subsamples random sequences, seeding alters which random sequences will be
 picked. This helps to ensure deterministic output which can be achieved by
 using the same seed. To pick a random seed, set \code{seed=-1}.}
+
+\item{klet}{Specify the k-let length to preserve during shuffling. This only
+affects the output is \code{algo="shuffled"} is set. -1 chooses the default value.}
+
+\item{sort}{Sort based on the counts from highest to lowest. Currently,
+the output given is sorted based on kmers (AA... first, TT... last).}
 
 \item{threads}{Number of threads to use. Currently not well optimized.}
 }
@@ -52,15 +52,39 @@ Count the k-mers in a fastq, fasta, or raw sequences file
 }
 \examples{
 # Create temporary file with sequences
-set.seed(1)
-test1 <- do.call(paste0, replicate(50, sample(c("A","C","G","T"), 1000, TRUE), FALSE))
+data(rbfox2_seqs)
 tf <- tempfile()
-writeLines(test1, tf)
+writeLines(rbfox2_seqs$bound, tf)
 
 # Count di-nucleotides in file
 count_kmers(tf, kmer = 2)
 
 # Count mono-nucleotide in file
 count_kmers(tf, kmer = 1)
+unlink(tf)
+
+# Count shuffled kmers
+count_kmers(tf, kmer = 1, algo = "shuffled")
+
+# Specify k-let to preserve during shuffling
+count_kmers(tf, kmer = 1, algo = "shuffled", klet = 2)
+
+# Count bootstrap kmers
+result <- count_kmers(tf, bootstrap_iters = 100)
+head(result)
+
+# Subsample 55.55\% of the file per bootstrap iteration
+result <- count_kmers(tf, bootstrap_iters = 100, sample = 55.55)
+head(result)
+
+# Count bootstrap shuffled kmers
+result <- count_kmers(tf, algo = "shuffled", bootstrap_iters = 100)
+head(result)
+
+# Sort by count
+result <- count_kmers(tf, kmer = 5, sort = TRUE)
+head(result)
+
+# Cleanup file
 unlink(tf)
 }
