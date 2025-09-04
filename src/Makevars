@@ -1,5 +1,5 @@
 PKG_CPPFLAGS = -I katss/source/katss/helpers -I katss/source/katss/KmerCounter/include
-PKG_LIBS = katss/build/source/katss/KmerCounter/source/libkkctr.a 
+PKG_LIBS = katss/build/source/katss/KmerCounter/source/libkkctr.a katss/build/source/seqfile/source/libseqf.a
 
 all: $(SHLIB)
 

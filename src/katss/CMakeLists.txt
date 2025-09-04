@@ -4,6 +4,8 @@ project(KATSS
 	DESCRIPTION "K-mer counting function utilities."
 	LANGUAGES C)
 
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # Default to a release build.
 if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 	message(STATUS "No build type selected; defaulting to Release")
