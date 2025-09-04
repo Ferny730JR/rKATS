@@ -24,6 +24,7 @@ regular(const char *test, const char *ctrl, KatssOptions *opts)
 		data->kmers[i].kmer = enr->enrichments[i].key;
 		data->kmers[i].rval = enr->enrichments[i].enrichment;
 	}
+	data->num_kmers = enr->num_enrichments;
 
 exit:
 	katss_free_enrichments(enr);
@@ -45,6 +46,7 @@ probs(const char *test, KatssOptions *opts)
 		data->kmers[i].kmer = enr->enrichments[i].key;
 		data->kmers[i].rval = enr->enrichments[i].enrichment;
 	}
+	data->num_kmers = enr->num_enrichments;
 
 exit:
 	katss_free_enrichments(enr);
@@ -55,7 +57,7 @@ static KatssData *
 ushuffle(const char *test, KatssOptions *opts)
 {
 	KatssEnrichments *enr;
-	enr = katss_ikke_shuffle(test, NULL, opts->kmer, opts->probs_ntprec, opts->iters, opts->normalize);
+	enr = katss_ikke_shuffle(test, opts->kmer, opts->probs_ntprec, opts->iters, opts->normalize);
 	if(enr == NULL)
 		return NULL;
 	
@@ -66,6 +68,7 @@ ushuffle(const char *test, KatssOptions *opts)
 		data->kmers[i].kmer = enr->enrichments[i].key;
 		data->kmers[i].rval = enr->enrichments[i].enrichment;
 	}
+	data->num_kmers = enr->num_enrichments;
 
 exit:
 	katss_free_enrichments(enr);

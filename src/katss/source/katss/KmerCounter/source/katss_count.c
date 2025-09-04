@@ -249,7 +249,7 @@ katss_count(const char *path, KatssOptions *opts)
 		}
 	}
 
-	/* If data is NULL, return NULL */
+	/* If data is NULL, reeturn NULL */
 	if(data == NULL)
 		return NULL;
 

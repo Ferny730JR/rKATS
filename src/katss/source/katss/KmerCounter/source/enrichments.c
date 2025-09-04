@@ -1,4 +1,5 @@
 #include <stdbool.h>
+#include <stdint.h>
 #include <string.h>
 #include <float.h>
 #include <math.h>
@@ -37,6 +38,11 @@ katss_compute_enrichments(KatssCounter *test, KatssCounter *control, bool normal
 		if(test_count == 0.0 || control_count == 0.0) { // Determine if enrichment is valid
 			enrichments->enrichments[i].enrichment = NAN;
 			continue;
+		}
+		if(test_count < 20 || control_count < 20) {
+			char kmer_str[20];
+			katss_unhash(kmer_str, i, test->kmer, false);
+			warning_message("count for `%s' is less than 20.", kmer_str);
 		}
 
 		double r_val = (test_count/test->total)/(control_count/control->total);
@@ -90,16 +96,21 @@ katss_compute_prob_enrichments(KatssCounter *test, KatssCounter *mono,
 		katss_unhash(kseq, i, test->kmer, true);
 
 		/* Get frequencies */
-		double test_frq, ctrl_frq;
-		katss_get_from_hash(test, KATSS_DOUBLE, &test_frq, i);
+		double test_count, test_frq, ctrl_frq;
+		katss_get_from_hash(test, KATSS_DOUBLE, &test_count, i);
 
-		test_frq = test_frq / test->total;
+		test_frq = test_count / test->total;
 		ctrl_frq = predict_kmer(kseq, mono, dint);
 
 		enrichments->enrichments[i].key = i; // Set key
 		if(test_frq == 0.0 || ctrl_frq == 0.0) { // Determine if enrichment is valid
 			enrichments->enrichments[i].enrichment = NAN;
 			continue;
+		}
+		if(test_count < 20) {
+			char kmer_str[20];
+			katss_unhash(kmer_str, i, test->kmer, false);
+			warning_message("count for `%s' is less than 20.", kmer_str);
 		}
 
 		double r_val = test_frq / ctrl_frq;
@@ -327,7 +338,7 @@ exit:
 }
 
 KatssEnrichments *
-katss_ikke_shuffle(const char *test, const char *ctrl, int kmer, int klet, uint64_t iterations, bool normalize)
+katss_ikke_shuffle(const char *test, int kmer, int klet, uint64_t iterations, bool normalize)
 {
 	KatssEnrichments *enrichments = NULL;
 
@@ -337,7 +348,7 @@ katss_ikke_shuffle(const char *test, const char *ctrl, int kmer, int klet, uint6
 		goto exit;
 
 	/* Get the counts for the control file */
-	KatssCounter *ctrl_counts = katss_count_kmers_ushuffle(ctrl, kmer, klet);
+	KatssCounter *ctrl_counts = katss_count_kmers_ushuffle(test, kmer, klet);
 	if(ctrl_counts == NULL)
 		goto cleanup_ctrl;
 
@@ -356,7 +367,7 @@ katss_ikke_shuffle(const char *test, const char *ctrl, int kmer, int klet, uint6
 		char kseq[17];
 		katss_unhash(kseq, enrichments->enrichments[i-1].key, test_counts->kmer, true);
 		katss_recount_kmer(test_counts, test, kseq);
-		katss_recount_kmer_shuffle(ctrl_counts, ctrl, klet, kseq);
+		katss_recount_kmer_shuffle(ctrl_counts, test, klet, kseq);
 		enrichments->enrichments[i] = katss_top_enrichment(test_counts, ctrl_counts, normalize);
 	}
 
@@ -371,7 +382,7 @@ KatssEnrichments *
 katss_ikke_shuffle_mt(const char *test, const char *ctrl, int kmer, int klet, uint64_t iterations, bool normalize, int threads)
 {
 	if(threads == 1)
-		katss_ikke_shuffle(test, ctrl, kmer, klet, iterations, normalize);
+		katss_ikke_shuffle(test, kmer, klet, iterations, normalize);
 
 	// TODO: Implementation
 	// Multithreaded shuffle function will not work as is since `shuffle` function
@@ -463,6 +474,15 @@ katss_top_enrichment(KatssCounter *test, KatssCounter *control, bool normalize)
 	top_kmer.enrichment = top_enrichment;
 	top_kmer.key = top_enrichment_hash;
 
+	/* Check count of top enrichment */
+	uint64_t count;
+	katss_get_from_hash(test, KATSS_UINT64, &count, top_kmer.key);
+	if(count < 20) {
+		char kmer_str[20];
+		katss_unhash(kmer_str, top_kmer.key, test->kmer, false);
+		warning_message("count for `%s' is less than 20.", kmer_str);
+	}
+
 	/* Everything (probably) worked! Hurray, now return. */
 	return top_kmer;
 }
@@ -504,6 +524,15 @@ katss_top_prediction(KatssCounter *test, KatssCounter *mono, KatssCounter *dint,
 	/* No top kmer was found (probs because something terrible happened) return empty struct */
 	if(top_enrichment == top_kmer.enrichment) {
 		return top_kmer;
+	}
+
+	/* Check count of top enrichment */
+	uint64_t count;
+	katss_get_from_hash(test, KATSS_UINT64, &count, top_kmer.key);
+	if(count < 20) {
+		char kmer_str[20];
+		katss_unhash(kmer_str, top_kmer.key, test->kmer, false);
+		warning_message("count for `%s' is less than 20.", kmer_str);
 	}
 
 	/* Fill struct with info */
