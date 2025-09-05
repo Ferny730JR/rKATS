@@ -153,6 +153,10 @@ katss_count_kmers_bootstrap(const char *filename, unsigned int kmer,
 	sample = MAX2(sample, 1);
 	sample = MIN2(sample, 100000);
 
+	/* Initialize random number generator */
+	thread_safe_rand_t *tsr = thread_safe_rand_init();
+
+	/* If no seed was provided create one */
 	unsigned int local_seed;
 	if(seed == NULL) {
 		local_seed = time(NULL);
@@ -160,7 +164,7 @@ katss_count_kmers_bootstrap(const char *filename, unsigned int kmer,
 	}
 
 	while(seqfgets_unlocked(read_file, buffer, BUFFER_SIZE)) {
-		if(rand_r(seed) % 100000 >= sample)
+		if(thread_safe_rand_r(tsr, seed) % 100000 >= sample)
 			continue;
 		katss_set_seq(hasher, buffer, filetype);
 		while(katss_get_fh(hasher, &hash_value, filetype)) {
@@ -480,7 +484,10 @@ katss_count_kmers_ushuffle_bootstrap(const char *filename, unsigned int kmer,
 	if(counter == NULL)
 		goto cleanup_hasher;
 
-	/* int to subsample from rand() */
+	/* Initialize random number generator */
+	thread_safe_rand_t *tsr = thread_safe_rand_init();
+
+	/* If no seed was provided create one */
 	unsigned int local_seed;
 	if(seed == NULL) {
 		local_seed = time(NULL);
@@ -490,7 +497,7 @@ katss_count_kmers_ushuffle_bootstrap(const char *filename, unsigned int kmer,
 	srand(1); // reset rand seed for shuffle
 	while(seqfgets_unlocked(read_file, buffer, BUFFER_SIZE)) {
 		/* Pick random sequences */
-		if(rand_r(seed) % 100000 >= sample)
+		if(thread_safe_rand_r(tsr, seed) % 100000 >= sample)
 			continue;
 		/* Shuffle sequences */
 		int seqlen = strlen(buffer);
