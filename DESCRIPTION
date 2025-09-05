@@ -1,6 +1,6 @@
 Package: rkats
 Title: R wrapper for the KATSS package
-Version: 0.9.1
+Version: 0.9.2
 Authors@R: c(
     person(given = "Francisco F",
            family = "Cavazos",

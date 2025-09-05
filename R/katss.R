@@ -36,7 +36,6 @@
 #'
 #' # Count mono-nucleotide in file
 #' count_kmers(tf, kmer = 1)
-#' unlink(tf)
 #'
 #' # Count shuffled kmers
 #' count_kmers(tf, kmer = 1, algo = "shuffled")
